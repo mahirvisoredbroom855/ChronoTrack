@@ -46,7 +46,7 @@ def start_session(task: str, tag: str = "General"):
     with open(LOG_FILE, "w") as f:
         json.dump(data, f, indent=4)
 
-    print(f"⏱️ Started task: {task} | Tag: {tag} | Time: {format_pretty_time(start_time)}")
+    print(f"🟢 Started task: {task} | Tag: {tag} | Time: {format_pretty_time(start_time)}")
 
 def stop_session():
     if not LOG_FILE.exists():
