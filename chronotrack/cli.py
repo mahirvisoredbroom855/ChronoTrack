@@ -4,7 +4,7 @@ app = typer.Typer() #creates the base CLI app
 
 
 
-from chronotrack.tracker import start_session, stop_session, log_sessions, export_data
+from chronotrack.tracker import start_session, stop_session, log_sessions, export_data, tags_view
 
 
 
@@ -17,15 +17,17 @@ from chronotrack.tracker import start_session, stop_session, log_sessions, expor
 
 
 @app.command()
-def start(task: str, tag: str = "General"):
+def start(
+    task: str = typer.Argument(..., help="Task description in quotes"),
+    tag: str = typer.Argument("General", help="Optional tag (default: General)")
+):
     """
     Start tracking a task.
     """
     start_session(task, tag)
-
-
-
     typer.echo(f"⏱️ Started: {task} | Tag: {tag}")
+
+    
 
 
 @app.command()
@@ -41,25 +43,36 @@ def stop():
 
 
 @app.command()
-def log():
+def log(time_range: str = typer.Argument("today", help="Choose from: today, yesterday, week, all")):
     """
-    Show the log of tasks for today.
+    Show task log for a given time period.
     """
-    log_sessions()
+    log_sessions(time_range)
 
 
-    typer.echo("📜 Today's log: (stub for now)")
 
 
 
 
 
 @app.command()
-def export():
+def export(format: str = typer.Argument("json", help="Format to export: json or csv")):
     """
-    Export session logs to JSON or CSV.
+    Export task log to a file (json or csv).
     """
     export_data(format)
+
+
+
+
+
+
+@app.command()
+def tags(tag_filter: str = typer.Argument(None, help="(Optional) Show only a specific tag")):
+    """
+    View all tags, or stats for a specific tag.
+    """
+    tags_view(tag_filter)
 
 
 
