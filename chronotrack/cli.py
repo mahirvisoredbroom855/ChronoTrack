@@ -4,7 +4,7 @@ app = typer.Typer() #creates the base CLI app
 
 
 
-from chronotrack.tracker import start_session, stop_session, log_sessions, export_data, tags_view
+from chronotrack.tracker import start_session, stop_session, log_sessions, export_data, tags_view, week_log
 
 
 
@@ -25,9 +25,8 @@ def start(
     Start tracking a task.
     """
     start_session(task, tag)
-    typer.echo(f"⏱️ Started: {task} | Tag: {tag}")
 
-    
+
 
 
 @app.command()
@@ -37,8 +36,6 @@ def stop():
     """
     stop_session()
 
-
-    typer.echo("🛑 Task stopped.")
 
 
 
@@ -73,6 +70,19 @@ def tags(tag_filter: str = typer.Argument(None, help="(Optional) Show only a spe
     View all tags, or stats for a specific tag.
     """
     tags_view(tag_filter)
+
+
+
+
+@app.command()
+def week():
+    """
+    View a detailed summary report of your last 7 days.
+    """
+    week_log()
+
+
+
 
 
 

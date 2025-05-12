@@ -12,20 +12,21 @@ from collections import defaultdict
 
 
 
+import statistics
+from collections import defaultdict, Counter
+
+from rich.prompt import Prompt
+from rich.progress import track
+from rich import box
+
+
+
+
 
 LOG_FILE = Path("session_log.json")
 
 def start_session(task: str, tag: str = "General"):
-
     start_time = datetime.now().isoformat()
-
-
-    entry = {
-        
-        "task": task,
-        "tag": tag,
-        "start": start_time
-    }
 
     if LOG_FILE.exists():
         with open(LOG_FILE, "r") as f:
@@ -33,48 +34,72 @@ def start_session(task: str, tag: str = "General"):
     else:
         data = []
 
+    # Check for an active session — only if it's from today
+    for session in reversed(data):
+        if "end" not in session:
+            session_time = datetime.fromisoformat(session["start"])
+            if session_time.date() == datetime.now().date():
+                pretty = session_time.strftime("%I:%M %p")
+                print(f"⚠️ Cannot start new session — task '{session['task']}' started at {pretty} is still active.")
+                return
+
+    # No active session found, safe to proceed
+    entry = {
+        "task": task,
+        "tag": tag,
+        "start": start_time
+    }
+
     data.append(entry)
 
     with open(LOG_FILE, "w") as f:
         json.dump(data, f, indent=4)
 
-    print(f"⏱️ Started task: {task} | Tag: {tag} | Time: {start_time}")
-        
+    pretty_time = datetime.now().strftime("%I:%M %p")
+    print(f"⏱️ Started task: {task} | Tag: {tag} | Time: {pretty_time}")
 
 
+
+
+from rich.prompt import Prompt
 
 def stop_session():
-
-
     if not LOG_FILE.exists():
-        print("⚠️ No active session to stop.")
+        print("⚠️ No session log found.")
         return
 
     with open(LOG_FILE, "r") as f:
         data = json.load(f)
-    
 
-    # Finding the latest session without any end
-
-    for session in reversed(data):
-
-        if "end" not in session:
-            end_time = datetime.now()
-            
-            session["end"] = end_time.isoformat()
-
-
-        start_time = datetime.fromisoformat(session["start"])
-        session["duration_minutes"] = round((end_time - start_time).total_seconds() / 60, 2)
-
-        with open(LOG_FILE, "w") as f:
-            json.dump(data, f, indent=4)
-
-        print(f"✅ Stopped task: {session['task']} | Duration: {session['duration_minutes']} min")
+    if not data:
+        print("⚠️ No tasks to stop.")
         return
 
-    
-    print("⚠️ All sessions already stopped.")
+    for session in reversed(data):
+        if "end" not in session:
+            end_time = datetime.now()
+            session["end"] = end_time.isoformat()
+
+            start_time = datetime.fromisoformat(session["start"])
+            session["duration_minutes"] = round((end_time - start_time).total_seconds() / 60, 2)
+
+            # 🔹 Ask for an optional note
+            note = Prompt.ask("📝 Add a note for this session (type '/' to skip)", default="/")
+
+            if note.strip() == "/":
+                session["note_added"] = False
+            else:
+                session["note"] = note.strip()
+                session["note_added"] = True
+
+            with open(LOG_FILE, "w") as f:
+                json.dump(data, f, indent=4)
+
+            print(f"🔴 Stopped Task: {session['task']} | Duration: {session['duration_minutes']} min")
+            return
+
+    print("⚠️ Nothing to stop — no active task found.")
+
 
 
 
@@ -231,4 +256,141 @@ def tags_view(tag_filter=None):
         table.add_row(tag, str(stats["count"]), f"{round(stats['duration'], 2)}")
 
     console = Console()
+    console.print(table)
+
+
+
+
+
+
+# chronotrack/tracker.py
+
+def week_log():
+    console = Console()
+
+    if not LOG_FILE.exists():
+        console.print("\n[bold red]No log file found.[/bold red]\n")
+        return
+
+    with open(LOG_FILE, "r") as f:
+        data = json.load(f)
+
+    now = datetime.now()
+    week_ago = now - timedelta(days=6)  # Last 7 days inclusive
+
+    filtered = [s for s in data if "start" in s and datetime.fromisoformat(s["start"]).date() >= week_ago.date()]
+
+    if not filtered:
+        console.print("\n[bold red]No tasks found in the last 7 days.[/bold red]\n")
+        return
+
+    if len(filtered) < 5:
+        console.print("\n[bold yellow]⚠ Not enough tasks to compute full week stats (found < 5). Showing partial data.[/bold yellow]\n")
+
+    console.print(f"\n[bold green]📆 Week Log: {week_ago.strftime('%a, %b %d')} — {now.strftime('%a, %b %d')}[/bold green]\n")
+
+    console.print("[bold]Choose a report mode:[/bold]")
+    console.print("[cyan]1.[/cyan] Heat map")
+    console.print("[cyan]2.[/cyan] Overall summary")
+    console.print("[cyan]3.[/cyan] Quantitative metrics")
+    console.print("[cyan]4.[/cyan] Tag analysis")
+    console.print("[cyan]5.[/cyan] All of the above")
+
+    mode_choice = Prompt.ask("Enter 1-5", choices=["1", "2", "3", "4", "5"], default="2")
+
+    if mode_choice == "1":
+        _week_heatmap(console, filtered)
+    elif mode_choice == "2":
+        _week_overall(console, filtered)
+    elif mode_choice == "3":
+        _week_quant(console, filtered)
+    elif mode_choice == "4":
+        _week_tags(console, filtered)
+    elif mode_choice == "5":
+        console.rule("[bold magenta]🔥 Heat Map")
+        _week_heatmap(console, filtered)
+        console.rule("[bold magenta]🧾 Overall Summary")
+        _week_overall(console, filtered)
+        console.rule("[bold magenta]📈 Quantitative Metrics")
+        _week_quant(console, filtered)
+        console.rule("[bold magenta]🏷️ Tag Analysis")
+        _week_tags(console, filtered)
+
+
+def _week_overall(console, sessions):
+    total_minutes = sum(s.get("duration_minutes", 0) for s in sessions if "duration_minutes" in s)
+    total_hours = round(total_minutes / 60, 2)
+    
+    days = {datetime.fromisoformat(s["start"]).date() for s in sessions}
+    average_per_day = round(total_hours / len(days), 2) if days else 0
+
+    table = Table(title="🧾 Overall Summary", box=box.HEAVY)
+    table.add_column("Metric", style="cyan", no_wrap=True)
+    table.add_column("Value", style="bold white")
+
+    table.add_row("Total Sessions", str(len(sessions)))
+    table.add_row("Total Hours", f"{total_hours} hrs")
+    table.add_row("Average per Day", f"{average_per_day} hrs")
+
+    console.print(table)
+
+
+def _week_quant(console, sessions):
+    durations = [s.get("duration_minutes") for s in sessions if "duration_minutes" in s]
+
+    if len(durations) < 2:
+        console.print("\n[italic yellow]Not enough complete sessions for statistical analysis.[/italic yellow]\n")
+        return
+
+    std_dev = round(statistics.stdev(durations), 2)
+    longest = max(durations)
+    shortest = min(durations)
+
+    table = Table(title="📈 Quantitative Metrics", box=box.SIMPLE)
+    table.add_column("Metric", style="magenta")
+    table.add_column("Value", justify="right", style="white")
+
+    table.add_row("Standard Deviation", f"{std_dev} mins")
+    table.add_row("Longest Session", f"{longest} mins")
+    table.add_row("Shortest Session", f"{shortest} mins")
+
+    console.print(table)
+
+
+def _week_tags(console, sessions):
+    tag_totals = defaultdict(float)
+    for s in sessions:
+        tag = s.get("tag", "Unlabeled")
+        if "duration_minutes" in s:
+            tag_totals[tag] += s["duration_minutes"]
+
+    if not tag_totals:
+        console.print("[italic]No tag data to display.[/italic]")
+        return
+
+    table = Table(title="🏷️ Time by Tag", box=box.ROUNDED)
+    table.add_column("Tag", style="cyan")
+    table.add_column("Time (min)", justify="right", style="yellow")
+
+    for tag, total in sorted(tag_totals.items(), key=lambda x: -x[1]):
+        table.add_row(tag, f"{round(total, 2)}")
+
+    console.print(table)
+
+
+def _week_heatmap(console, sessions):
+    # Build a grid: each day of the week and count of sessions
+    heat = defaultdict(int)
+    for s in sessions:
+        date = datetime.fromisoformat(s["start"]).strftime("%a")
+        heat[date] += 1
+
+    days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+    table = Table(title="🔥 Weekly Heat Map", box=box.MINIMAL_DOUBLE_HEAD)
+    for day in days:
+        table.add_column(day, justify="center")
+
+    table.add_row(*[str(heat.get(day, 0)) for day in days])
+
     console.print(table)
