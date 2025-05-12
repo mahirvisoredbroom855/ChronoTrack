@@ -1,27 +1,22 @@
 import json
-
+import csv
+import statistics
 from datetime import datetime, timedelta
 from pathlib import Path
-
-from rich.table import Table
-from rich.console import Console
-
-import csv
-
-from collections import defaultdict
-
-
-
-import statistics
 from collections import defaultdict, Counter
 
+from rich.console import Console
+from rich.table import Table
 from rich.prompt import Prompt
 from rich.progress import track
 from rich import box
 
-
-
-
+from chronotrack.utils import (
+    format_pretty_time,
+    is_active_session,
+    calculate_duration_minutes,
+    get_week_range
+)
 
 LOG_FILE = Path("session_log.json")
 
@@ -34,16 +29,12 @@ def start_session(task: str, tag: str = "General"):
     else:
         data = []
 
-    # Check for an active session — only if it's from today
-    for session in reversed(data):
-        if "end" not in session:
-            session_time = datetime.fromisoformat(session["start"])
-            if session_time.date() == datetime.now().date():
-                pretty = session_time.strftime("%I:%M %p")
-                print(f"⚠️ Cannot start new session — task '{session['task']}' started at {pretty} is still active.")
-                return
+    if data and is_active_session(data[-1]):
+        last = data[-1]
+        task = last.get("task", "Unnamed")
+        print(f"⚠️ Cannot start new session — task '{task}' started at {format_pretty_time(last['start'])} is still active.")
+        return
 
-    # No active session found, safe to proceed
     entry = {
         "task": task,
         "tag": tag,
@@ -55,13 +46,7 @@ def start_session(task: str, tag: str = "General"):
     with open(LOG_FILE, "w") as f:
         json.dump(data, f, indent=4)
 
-    pretty_time = datetime.now().strftime("%I:%M %p")
-    print(f"⏱️ Started task: {task} | Tag: {tag} | Time: {pretty_time}")
-
-
-
-
-from rich.prompt import Prompt
+    print(f"⏱️ Started task: {task} | Tag: {tag} | Time: {format_pretty_time(start_time)}")
 
 def stop_session():
     if not LOG_FILE.exists():
@@ -76,16 +61,12 @@ def stop_session():
         return
 
     for session in reversed(data):
-        if "end" not in session:
+        if is_active_session(session):
             end_time = datetime.now()
             session["end"] = end_time.isoformat()
+            session["duration_minutes"] = calculate_duration_minutes(session["start"], session["end"])
 
-            start_time = datetime.fromisoformat(session["start"])
-            session["duration_minutes"] = round((end_time - start_time).total_seconds() / 60, 2)
-
-            # 🔹 Ask for an optional note
             note = Prompt.ask("📝 Add a note for this session (type '/' to skip)", default="/")
-
             if note.strip() == "/":
                 session["note_added"] = False
             else:
