@@ -15,7 +15,6 @@ def start(
 ):
     """
     🟢 Start tracking a new task.
-    Creates a new time entry and blocks overlapping sessions.
     """
     start_session(task, tag)
 
@@ -24,7 +23,6 @@ def start(
 def stop():
     """
     🔴 Stop the most recent active task.
-    Records end time, duration, and optionally prompts for a note.
     """
     stop_session()
 
@@ -35,7 +33,6 @@ def log(
 ):
     """
     📜 Show a log of tracked tasks.
-    Use a time range to filter results: today, yesterday, week, all.
     """
     log_sessions(time_range)
 
@@ -46,7 +43,6 @@ def export(
 ):
     """
     💾 Export your task log to a file.
-    Useful for reports, analysis, or backups.
     """
     export_data(format)
 
@@ -57,7 +53,6 @@ def tags(
 ):
     """
     🏷️ View tag-based summaries.
-    Shows count and total time spent for each tag.
     """
     tags_view(tag_filter)
 
@@ -66,7 +61,6 @@ def tags(
 def week():
     """
     📊 View a 7-day summary of your work.
-    Choose from visual heat maps, tag analysis, or full reports.
     """
     week_log()
 
