@@ -1,5 +1,5 @@
 [project]
-name = "chronotrack"
+name = "chronotrack-cli"
 version = "0.1.0"
 description = "A developer-focused CLI time tracker with tagging, breaks, and rich analytics."
 readme = "README.md"
@@ -26,3 +26,4 @@ where = ["chronotrack"]
 
 [tool.setuptools]
 include-package-data = true
+
