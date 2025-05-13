@@ -1,6 +1,6 @@
 [project]
 name = "chronotrack-cli"
-version = "0.1.4"
+version = "0.1.5"
 description = "A developer-focused CLI time tracker with tagging, breaks, and rich analytics."
 readme = "README.md"
 license = {text = "MIT"}
@@ -26,7 +26,8 @@ chronotrack = "chronotrack.cli:app"
 
 
 [tool.setuptools.packages.find]
-where = ["chronotrack"]
+include = ["chronotrack"]
+
 
 [tool.setuptools]
 include-package-data = true
