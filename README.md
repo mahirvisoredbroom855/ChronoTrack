@@ -14,24 +14,6 @@
 
 ---
 
-## 📋 Table of Contents
-
-- [Features](#-features)
-- [Installation](#-installation)
-- [Quick Start](#-quick-start)
-- [Command Reference](#-command-reference)
-- [Usage Examples](#-usage-examples)
-- [Productivity Reports](#-productivity-reports)
-- [Data Management](#-data-management)
-- [Customization](#-customization)
-- [Philosophy](#-philosophy)
-- [Technical Details](#-technical-details)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Acknowledgements](#-acknowledgements)
-
----
-
 ## 🚀 Features
 
 <div align="center">
