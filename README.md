@@ -12,7 +12,7 @@
 ## 🚀 Features
 
 * 🟢 Start & 🔴 Stop focused task sessions
-* ⏸ Pause & ▶️ Resume breaks (stored per session)
+* ⏸️ Pause & ▶️ Resume breaks (stored per session)
 * 🧾 View clean logs by day, week, or all time
 * 📈 Weekly summary with standard deviation and break analytics
 * 🏷 Tag usage summaries
@@ -82,7 +82,7 @@ chronotrack week
 
 You’ll see:
 
-```
+```python
 📆 Week Log: Mon, May 06 — Sun, May 12
 
 🧾 Overall Summary
