@@ -76,31 +76,31 @@ pip install -e .
 
 ## 🚀 Quick Start
 
-### 1. Start tracking a task:
+### 1. 🟢 Start tracking a task:
 
 ```bash
 chronotrack start "Implement authentication module" backend
 ```
 
-### 2. Take a break:
+### 2. ⏸️ Take a break:
 
 ```bash
 chronotrack pause
 ```
 
-### 3. Resume work:
+### 3. ▶️ Resume work:
 
 ```bash
 chronotrack play
 ```
 
-### 4. Finish your session:
+### 4. 🔴 Finish your session:
 
 ```bash
 chronotrack stop "Completed user auth flow implementation"
 ```
 
-### 5. View your day's progress:
+### 5. 📈 View your day's progress:
 
 ```bash
 chronotrack log today
