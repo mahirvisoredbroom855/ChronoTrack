@@ -14,9 +14,12 @@ from rich import box
 from chronotrack.utils import (
     format_pretty_time,
     is_active_session,
+    is_paused_session,
     calculate_duration_minutes,
-    get_week_range
+    start_break,
+    end_break
 )
+
 
 LOG_FILE = Path("session_log.json")
 
@@ -46,7 +49,10 @@ def start_session(task: str, tag: str = "General"):
     with open(LOG_FILE, "w") as f:
         json.dump(data, f, indent=4)
 
-    print(f"🟢 Started task: {task} | Tag: {tag} | Time: {format_pretty_time(start_time)}")
+    print(f"🟢 Started: {task} | 🏷️  {tag} | ⏰ {format_pretty_time(start_time)}")
+
+
+
 
 def stop_session():
     if not LOG_FILE.exists():
@@ -56,31 +62,40 @@ def stop_session():
     with open(LOG_FILE, "r") as f:
         data = json.load(f)
 
-    if not data:
-        print("⚠️ No tasks to stop.")
+    if not data or not is_active_session(data[-1]):
+        print("⚠️ No active session to stop.")
         return
 
-    for session in reversed(data):
-        if is_active_session(session):
-            end_time = datetime.now()
-            session["end"] = end_time.isoformat()
-            session["duration_minutes"] = calculate_duration_minutes(session["start"], session["end"])
+    session = data[-1]
 
-            note = Prompt.ask("📝 Add a note for this session (type '/' to skip)", default="/")
-            if note.strip() == "/":
-                session["note_added"] = False
-            else:
-                session["note"] = note.strip()
-                session["note_added"] = True
+    # Finalize break if paused
+    if is_paused_session(session):
+        end_break(session)
 
-            with open(LOG_FILE, "w") as f:
-                json.dump(data, f, indent=4)
+    # Always include breaks field, even if empty
+    if "breaks" not in session:
+        session["breaks"] = []
 
-            print(f"🔴 Stopped Task: {session['task']} | Duration: {session['duration_minutes']} min")
-            return
+    session["total_breaks"] = len(session["breaks"])
 
-    print("⚠️ Nothing to stop — no active task found.")
 
+    end_time = datetime.now()
+    session["end"] = end_time.isoformat()
+
+    break_time = sum(b.get("duration_minutes", 0) for b in session.get("breaks", [])) if "breaks" in session else 0
+    session["duration_minutes"] = calculate_duration_minutes(session["start"], session["end"]) - break_time
+    session["total_break_time"] = round(break_time, 2)
+
+
+    note = Prompt.ask("📝 Add a note for this session (type '/' to skip)", default="/")
+    session["note_added"] = note.strip() != "/"
+    if session["note_added"]:
+        session["note"] = note.strip()
+
+    with open(LOG_FILE, "w") as f:
+        json.dump(data, f, indent=4)
+
+    print(f"🔴 Stopped: {session['task']} | ⏰ {session['duration_minutes']} min | ☕️ {round(break_time, 2)} min")
 
 
 
@@ -301,7 +316,14 @@ def week_log():
 def _week_overall(console, sessions):
     total_minutes = sum(s.get("duration_minutes", 0) for s in sessions if "duration_minutes" in s)
     total_hours = round(total_minutes / 60, 2)
-    
+
+    total_break_time = 0
+    total_breaks = 0
+    for s in sessions:
+        for b in s.get("breaks", []):
+            total_break_time += b.get("duration_minutes", 0)
+        total_breaks += len(s.get("breaks", []))
+
     days = {datetime.fromisoformat(s["start"]).date() for s in sessions}
     average_per_day = round(total_hours / len(days), 2) if days else 0
 
@@ -312,12 +334,14 @@ def _week_overall(console, sessions):
     table.add_row("Total Sessions", str(len(sessions)))
     table.add_row("Total Hours", f"{total_hours} hrs")
     table.add_row("Average per Day", f"{average_per_day} hrs")
+    table.add_row("Total Breaks", str(total_breaks))
+    table.add_row("Total Break Time", f"{round(total_break_time, 2)} mins")
 
     console.print(table)
 
-
 def _week_quant(console, sessions):
     durations = [s.get("duration_minutes") for s in sessions if "duration_minutes" in s]
+    break_durations = [b.get("duration_minutes") for s in sessions for b in s.get("breaks", []) if "duration_minutes" in b]
 
     if len(durations) < 2:
         console.print("\n[italic yellow]Not enough complete sessions for statistical analysis.[/italic yellow]\n")
@@ -331,11 +355,21 @@ def _week_quant(console, sessions):
     table.add_column("Metric", style="magenta")
     table.add_column("Value", justify="right", style="white")
 
-    table.add_row("Standard Deviation", f"{std_dev} mins")
+    table.add_row("Work Std Dev", f"{std_dev} mins")
     table.add_row("Longest Session", f"{longest} mins")
     table.add_row("Shortest Session", f"{shortest} mins")
 
+    if break_durations:
+        break_std = round(statistics.stdev(break_durations), 2) if len(break_durations) > 1 else 0.0
+        avg_break = round(sum(break_durations) / len(break_durations), 2)
+        table.add_row("Avg Break Duration", f"{avg_break} mins")
+        table.add_row("Break Std Dev", f"{break_std} mins")
+    else:
+        table.add_row("Avg Break Duration", "0 mins")
+        table.add_row("Break Std Dev", "0 mins")
+
     console.print(table)
+
 
 
 def _week_tags(console, sessions):
@@ -375,3 +409,56 @@ def _week_heatmap(console, sessions):
     table.add_row(*[str(heat.get(day, 0)) for day in days])
 
     console.print(table)
+
+
+
+def pause_session():
+    if not LOG_FILE.exists():
+        print("⚠️ No session log found.")
+        return
+
+    with open(LOG_FILE, "r") as f:
+        data = json.load(f)
+
+    if not data or not is_active_session(data[-1]):
+        print("⚠️ No active session to pause.")
+        return
+
+    session = data[-1]
+
+    if is_paused_session(session):
+        print("⚠️ Session is already paused.")
+        return
+
+    start_break(session)
+
+    with open(LOG_FILE, "w") as f:
+        json.dump(data, f, indent=4)
+
+    print(f"⏸️ Paused task: {session['task']} at {format_pretty_time(session['breaks'][-1]['start'])}")
+
+
+def resume_session():
+    if not LOG_FILE.exists():
+        print("⚠️ No session log found.")
+        return
+
+    with open(LOG_FILE, "r") as f:
+        data = json.load(f)
+
+    if not data or not is_active_session(data[-1]):
+        print("⚠️ No active session to resume.")
+        return
+
+    session = data[-1]
+
+    if not is_paused_session(session):
+        print("⚠️ Session is not paused.")
+        return
+
+    end_break(session)
+
+    with open(LOG_FILE, "w") as f:
+        json.dump(data, f, indent=4)
+
+    print(f"▶️ Resumed task: {session['task']} at {format_pretty_time(session['breaks'][-1]['end'])}")
