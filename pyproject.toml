@@ -24,6 +24,7 @@ Issues = "https://github.com/mahirvisoredbroom855/ChronoTrack/issues"
 [project.scripts]
 chronotrack = "chronotrack.cli:app"
 
+
 [tool.setuptools.packages.find]
 where = ["chronotrack"]
 

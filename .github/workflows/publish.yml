@@ -1,34 +1,38 @@
 name: Publish to PyPI
 
+description: Automatically builds and publishes to PyPI when a release is created
+
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  release:
+    types: [published]
 
 jobs:
   build-and-publish:
+    name: Build and publish Python package
     runs-on: ubuntu-latest
 
     permissions:
-      id-token: write  # for trusted publishing (PyPI)
       contents: read
+      id-token: write
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Check out repository
+      uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: "3.11"
+        python-version: '3.11'
 
-    - name: Install build tools
+    - name: Install build dependencies
       run: |
-        pip install build
+        python -m pip install --upgrade pip
+        pip install build twine
 
     - name: Build package
       run: python -m build
 
-    - name: Publish to PyPI
+    - name: Upload to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ secrets.PYPI_API_TOKEN }}
