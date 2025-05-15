@@ -27,6 +27,7 @@
 - **📊 Analytics** - Visualize productivity patterns with built-in statistics and charts
 - **📝 Session Notes** - Document context, achievements, and thoughts for each session
 - **📈 Weekly Reports** - Get insights into your productivity with comprehensive weekly summaries
+- **💹 Mail Based Github Like HTML Reports** - Track your progress more like github commits, in any frequency as your like.
 - **🔄 Flexible Exports** - Export your data to JSON or CSV for external analysis
 - **🎨 Rich Terminal UI** - Enjoy a visually appealing interface with color-coding and formatting
 - **⚡ Performance** - Minimal resource usage with lightning-fast command execution
@@ -108,7 +109,7 @@ chronotrack log today
 
 > **⚠️ WARNING: Always stop your current session before starting a new one. Running multiple active sessions simultaneously can lead to data corruption or inaccurate time tracking.**
 
-### 6. 📊 Setup HTML Github Like & Email Report:
+### 6. 📊 Setup HTML Github Like Report & Email Report:
 
 ```bash
 chronotrack report
