@@ -1,3 +1,5 @@
 Learning_Folder/
 session_log.json
 *.json
+*.env
+user_preferences.json
