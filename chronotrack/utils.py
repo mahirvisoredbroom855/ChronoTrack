@@ -30,3 +30,20 @@ def end_break(session: dict):
     last_break["duration_minutes"] = calculate_duration_minutes(
         last_break["start"], last_break["end"]
     )
+
+
+from pathlib import Path
+import json
+
+# Path: project_root/user_preferences.json
+PREFS_FILE = Path(__file__).resolve().parent.parent / "user_preferences.json"
+
+def load_preferences():
+    if PREFS_FILE.exists():
+        with open(PREFS_FILE, "r") as f:
+            return json.load(f)
+    return None
+
+def save_preferences(data):
+    with open(PREFS_FILE, "w") as f:
+        json.dump(data, f, indent=4)
