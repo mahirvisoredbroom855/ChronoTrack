@@ -108,6 +108,18 @@ chronotrack log today
 
 > **⚠️ WARNING: Always stop your current session before starting a new one. Running multiple active sessions simultaneously can lead to data corruption or inaccurate time tracking.**
 
+### 6. 📊 Setup HTML Github Like & Email Report:
+
+```bash
+chronotrack report
+```
+
+```bash
+chronotrack setup-email-schedule
+```
+
+> **⚠️ WARNING: Make Sure You Have A Dedicated Domain inserted in email_sender.py and your specific API key in .env file inside your python package.**
+
 ---
 
 ## 💻 Command Reference
@@ -217,6 +229,99 @@ chronotrack week --compare last   # Compare with previous week
 > **💡 BEST PRACTICE: Review your weekly reports every Friday to identify productivity patterns and adjust your work habits for the following week.**
 
 ---
+
+
+## 📬 Email Reports with Custom Domain (Resend Setup)
+
+ChronoTrack allows you to **automatically send weekly productivity reports** via email using [Resend](https://resend.com). To do this properly and avoid spam issues, you'll need to verify your own domain.
+
+![Report Example](images/htmlreport.png)
+
+
+---
+
+### ✅ Step 1: Set Up Your Domain on Resend
+
+1. Go to [resend.com](https://resend.com) and sign up
+2. Click on **"Domains"** → **"Add Domain"**
+3. Enter your domain (e.g., `yourdomain.com`)
+4. Add the DNS records (SPF, DKIM, Return-Path) to your domain’s registrar
+5. Wait for the domain to be **verified** by Resend
+
+---
+
+### 🔑 Step 2: Generate API Key
+
+1. Go to Resend → **"API Keys"**
+2. Click **"Create API Key"**
+3. Copy and save this key securely
+
+---
+
+### ⚙️ Step 3: Configure Environment Variables
+
+Create a `.env` file in your project root:
+
+```env
+RESEND_API_KEY=your-resend-api-key
+SENDER_EMAIL=yourname@yourdomain.com
+```
+
+> Your `SENDER_EMAIL` must match the verified domain.
+
+---
+
+### 📤 Step 4: Send a Report via CLI
+
+You can generate and send your weekly report with:
+
+```bash
+chronotrack report --email yourname@yourdomain.com 
+```
+
+Or You Can Preview in Web
+
+```bash
+chronotrack report --preview 
+```
+
+This will:
+- Build a complete HTML report of the past week
+- Open it in your browser
+- Send it to the specified email
+
+---
+
+### 🔁 Step 5: Enable Automated Weekly Reports
+
+Run the guided setup:
+
+```bash
+chronotrack set_schedule
+```
+
+You’ll be asked:
+
+```
+📬 Enter the email to receive reports:
+⏳ How often should reports be sent (in days)?
+```
+
+This creates a `user_preferences.json` file, and you can then schedule the following script to run daily:
+
+```bash
+python chronotrack_scheduled_runner.py
+```
+
+Use `crontab -e` or macOS `launchd` to schedule it.
+
+---
+
+> 💡 **Note**: You must keep the `.env` file available for environment access during scheduled execution.
+
+
+
+
 
 ## 💾 Data Management
 
@@ -368,6 +473,8 @@ chronotrack/
 > alias ctr="chronotrack play"  # resume
 > alias cte="chronotrack stop"  # end
 > alias ctl="chronotrack log today"
+> alias ctl="chronotrack report --preview"
+> alias ctl="chronotrack report --email <yourmail>"
 > ```
 
 ---
