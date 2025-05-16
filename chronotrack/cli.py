@@ -236,6 +236,7 @@ def setup_email_schedule():
     typer.echo("\n📧 Let's set up your report schedule!")
 
     email = typer.prompt("Enter the email address you want reports sent to")
+    name = typer.prompt("Enter your name")
 
     typer.echo("\nHow often should we send the report?")
     typer.echo("Options: daily, weekly, every 2 days, every 3 days, etc.")
@@ -252,6 +253,7 @@ def setup_email_schedule():
         raise typer.Exit()
 
     preferences = {
+        "name": name,
         "email": email,
         "days": days,
         "last_sent": datetime.now().isoformat()
