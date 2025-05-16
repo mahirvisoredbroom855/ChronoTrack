@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: chronotrack-cli
-Version: 0.1.8
+Version: 0.1.9
 Summary: A developer-focused CLI time tracker with tagging, breaks, and rich analytics.
 Author-email: Shahriyar Ahmed Mahir <nafismahir@icloud.com>
 License: MIT

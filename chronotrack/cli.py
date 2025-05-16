@@ -243,16 +243,16 @@ def setup_email_schedule():
     """⚙️ Setup auto-reporting frequency and email."""
     typer.echo("\n📧 Let's set up your email report schedule!")
 
-    # Ask user for email and name
-    email = typer.prompt("Enter the email address you want reports sent to")
-    name = typer.prompt("Enter your name")
+    # Step 1: Get user inputs
+    email = typer.prompt("📨 Enter the recipient email address")
+    name = typer.prompt("🙋‍♂️ Enter your name")
+    sender_domain = typer.prompt("🌐 Enter your verified sender domain (e.g., reports@yourdomain.com)")
 
-    # Ask for frequency
     typer.echo("\n📅 How often should we send the report?")
     typer.echo("Options: daily, weekly, every 2 days, every 3 days, etc.")
     frequency = typer.prompt("Enter frequency (e.g., daily, 2, 3, weekly)").lower().strip()
 
-    # Convert frequency into integer days
+    # Step 2: Convert frequency to number of days
     if frequency == "daily":
         days = 1
     elif frequency == "weekly":
@@ -263,27 +263,33 @@ def setup_email_schedule():
         typer.echo("❌ Invalid input. Please enter 'daily', 'weekly', or a number of days.")
         raise typer.Exit()
 
-    # Ask for API key
-    api_key = typer.prompt("Enter your Resend API key (You can find it in your Resend dashboard)")
+    # Step 3: Ask for API key
+    api_key = typer.prompt("🔑 Enter your Resend API key (from your Resend dashboard)")
 
-    # Save API key to local .env inside CWD/.chronotrack
+    # Step 4: Save to CWD/.chronotrack/.env
     env_path = Path.cwd() / ".chronotrack" / ".env"
     env_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Clean old key if exists
     lines = []
     if env_path.exists():
         with open(env_path, "r") as f:
             lines = f.readlines()
-        lines = [line for line in lines if not line.startswith("RESEND_API_KEY=")]
+        # Remove old values if they exist
+        lines = [
+            line for line in lines
+            if not line.startswith("RESEND_API_KEY=")
+            and not line.startswith("DOMAIN_NAME=")
+        ]
 
     lines.append(f"RESEND_API_KEY={api_key}\n")
+    lines.append(f"DOMAIN_NAME={sender_domain}\n")
+
     with open(env_path, "w") as f:
         f.writelines(lines)
 
-    typer.echo(f"🔐 API key saved to {env_path}")
+    typer.echo(f"🔐 API key and domain saved to {env_path}")
 
-    # Save preferences to ~/.chronotrack/user_preferences.json
+    # Step 5: Save user preferences (name, email, days, last sent)
     preferences = {
         "name": name,
         "email": email,
@@ -294,7 +300,6 @@ def setup_email_schedule():
     save_preferences(preferences)
 
     typer.echo(f"\n✅ Reports will be sent every {days} day(s) to {email}")
-
 
 
 

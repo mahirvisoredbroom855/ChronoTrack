@@ -35,7 +35,7 @@ def get_project_data_dir():
 
 
 PREFS_FILE = get_project_data_dir() / "user_preferences.json"
-
+ENV
 
 
 def get_user_name():
@@ -47,6 +47,28 @@ def get_user_name():
         except Exception:
             pass
     return "ChronoTrack User"
+
+
+
+def get_domain_name():
+    """
+    Returns the DOMAIN_NAME from .chronotrack/.env.
+    Checks CWD first, then HOME directory as fallback.
+    """
+    # Look for .env in current working directory
+    cwd_env = Path.cwd() / ".chronotrack" / ".env"
+    home_env = Path.home() / ".chronotrack" / ".env"
+
+    if cwd_env.exists():
+        load_dotenv(dotenv_path=cwd_env)
+    elif home_env.exists():
+        load_dotenv(dotenv_path=home_env)
+
+    domain = os.getenv("DOMAIN_NAME")
+
+    if not domain:
+        print("❌ DOMAIN_NAME not found in .env.")
+    return domain or ""
 
 
 
@@ -68,10 +90,11 @@ def send_email_report(to_email: str, html_report_path: Path):
         html_content = f.read()
 
     user_name = get_user_name()
+    domain = get_domain_name()
 
     try:
         response = resend.Emails.send({
-            "from": "ChronoTrack <reports@mahirandnabiha.icu>",  # Must be a verified sender domain
+            "from": f"ChronoTrack <{domain}>",  # Must be a verified sender domain
             "to": [to_email],
             "subject": f"📊 Your Weekly ChronoTrack Report for {user_name}",
             "html": html_content,
