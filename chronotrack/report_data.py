@@ -5,19 +5,26 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 from pathlib import Path
 
+
 class ReportBuilder:
     def __init__(self, json_path=None):
-        # Automatically reference the session_log.json one level outside /chronotrack
         if json_path is None:
-            project_root = Path(__file__).resolve().parent.parent
-            json_path = project_root / "session_log.json"
+            # Save to ~/.chronotrack/session_log.json
+            project_dir = Path.cwd() / ".chronotrack"
+            project_dir.mkdir(parents=True, exist_ok=True)
+            json_path = project_dir / "session_log.json"
+
+
         self.path = json_path
         self.sessions = self.load_sessions()
         self.now = datetime.now()
 
     def load_sessions(self):
+        if not self.path.exists():
+            return []
         with open(self.path, "r") as f:
             return json.load(f)
+
 
     def get_week_range(self):
         end = self.now

@@ -20,8 +20,18 @@ from chronotrack.utils import (
     end_break
 )
 
+def get_project_data_dir():
+    """
+    Returns the .chronotrack folder inside the current working directory.
+    Creates it if it doesn't exist.
+    """
+    project_dir = Path.cwd() / ".chronotrack"
+    project_dir.mkdir(parents=True, exist_ok=True)
+    return project_dir
 
-LOG_FILE = Path("session_log.json")
+
+LOG_FILE = get_project_data_dir() / "session_log.json"
+
 
 def start_session(task: str, tag: str = "General"):
     start_time = datetime.now().isoformat()
@@ -462,3 +472,5 @@ def resume_session():
         json.dump(data, f, indent=4)
 
     print(f"▶️ Resumed task: {session['task']} at {format_pretty_time(session['breaks'][-1]['end'])}")
+
+

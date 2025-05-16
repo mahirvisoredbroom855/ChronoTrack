@@ -32,11 +32,24 @@ def end_break(session: dict):
     )
 
 
-from pathlib import Path
+def get_project_data_dir():
+    """
+    Returns the .chronotrack folder inside the current working directory.
+    Creates it if it doesn't exist.
+    """
+    project_dir = Path.cwd() / ".chronotrack"
+    project_dir.mkdir(parents=True, exist_ok=True)
+    return project_dir
+
+
+
 import json
 
 # Path: project_root/user_preferences.json
-PREFS_FILE = Path(__file__).resolve().parent.parent / "user_preferences.json"
+from pathlib import Path
+
+PREFS_FILE = get_project_data_dir() / "user_preferences.json"
+
 
 def load_preferences():
     if PREFS_FILE.exists():

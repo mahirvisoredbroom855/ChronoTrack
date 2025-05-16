@@ -196,7 +196,6 @@ def report(preview: bool = typer.Option(False, "--preview", help="Preview the re
 
     if email:
         send_email_report(email, html_path)
-        print(f"📧 Report sent to {email}")
 
 
 
@@ -230,18 +229,30 @@ def load_preferences():
     return None
 
 
+from pathlib import Path
+from datetime import datetime
+import typer
+import os
+import json
+
+from chronotrack.utils import save_preferences
+
+
 @app.command()
 def setup_email_schedule():
     """⚙️ Setup auto-reporting frequency and email."""
-    typer.echo("\n📧 Let's set up your report schedule!")
+    typer.echo("\n📧 Let's set up your email report schedule!")
 
+    # Ask user for email and name
     email = typer.prompt("Enter the email address you want reports sent to")
     name = typer.prompt("Enter your name")
 
-    typer.echo("\nHow often should we send the report?")
+    # Ask for frequency
+    typer.echo("\n📅 How often should we send the report?")
     typer.echo("Options: daily, weekly, every 2 days, every 3 days, etc.")
     frequency = typer.prompt("Enter frequency (e.g., daily, 2, 3, weekly)").lower().strip()
 
+    # Convert frequency into integer days
     if frequency == "daily":
         days = 1
     elif frequency == "weekly":
@@ -252,14 +263,39 @@ def setup_email_schedule():
         typer.echo("❌ Invalid input. Please enter 'daily', 'weekly', or a number of days.")
         raise typer.Exit()
 
+    # Ask for API key
+    api_key = typer.prompt("Enter your Resend API key (You can find it in your Resend dashboard)")
+
+    # Save API key to local .env inside CWD/.chronotrack
+    env_path = Path.cwd() / ".chronotrack" / ".env"
+    env_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Clean old key if exists
+    lines = []
+    if env_path.exists():
+        with open(env_path, "r") as f:
+            lines = f.readlines()
+        lines = [line for line in lines if not line.startswith("RESEND_API_KEY=")]
+
+    lines.append(f"RESEND_API_KEY={api_key}\n")
+    with open(env_path, "w") as f:
+        f.writelines(lines)
+
+    typer.echo(f"🔐 API key saved to {env_path}")
+
+    # Save preferences to ~/.chronotrack/user_preferences.json
     preferences = {
         "name": name,
         "email": email,
         "days": days,
         "last_sent": datetime.now().isoformat()
     }
+
     save_preferences(preferences)
+
     typer.echo(f"\n✅ Reports will be sent every {days} day(s) to {email}")
+
+
 
 
 # Background worker that checks if it's time to send a report
