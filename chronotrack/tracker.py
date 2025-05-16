@@ -83,7 +83,7 @@ def stop_session():
     session["end"] = end_time.isoformat()
 
     break_time = sum(b.get("duration_minutes", 0) for b in session.get("breaks", [])) if "breaks" in session else 0
-    session["duration_minutes"] = round(calculate_duration_minutes(session["start"], session["end"]) - break_time, 2)
+    session["duration_minutes"] = calculate_duration_minutes(session["start"], session["end"]) - break_time
     session["total_break_time"] = round(break_time, 2)
 
 
