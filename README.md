@@ -12,6 +12,7 @@
 > **A lightweight yet powerful CLI-based time tracker engineered for developers and creators. Log your work sessions, breaks, categorize with tags, and analyze productivity patterns—all from your terminal.**
 
 ---
+🎥 [Watch the ChronoTrack Intro Video](videos/Promo_Video.mov)
 
 ## 🚀 Features
 
@@ -261,12 +262,13 @@ ChronoTrack allows you to **automatically send weekly productivity reports** via
 
 ### ⚙️ Step 3: Configure Environment Variables
 
-Create a `.env` file in your project root:
+Create a `.env` file:
 
-```env
-RESEND_API_KEY=your-resend-api-key
-SENDER_EMAIL=yourname@yourdomain.com
+```bash
+chronotrack setup-email-schedule
 ```
+
+Briefly Follow The Prompts, You Will Be Asked For Your API Key
 
 > Your `SENDER_EMAIL` must match the verified domain.
 
@@ -331,7 +333,7 @@ Use `crontab -e` or macOS `launchd` to schedule it.
 ChronoTrack stores your session data in a simple, human-readable JSON file:
 
 ```
-~/.chronotrack/session_log.json
+YOUR_PROJECT/.chronotrack/session_log.json
 ```
 
 ### Data Format
