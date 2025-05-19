@@ -22,17 +22,17 @@
 
 </div>
 
-- **🟢 Session Management** - Start, stop, pause, and resume work sessions with precision
-- **⏱️ Break Tracking** - Automatically track break durations for better work/rest balancing
-- **🏷️ Tagging System** - Categorize your work with customizable tags for detailed reporting
-- **📊 Analytics** - Visualize productivity patterns with built-in statistics and charts
-- **📝 Session Notes** - Document context, achievements, and thoughts for each session
-- **📈 Weekly Reports** - Get insights into your productivity with comprehensive weekly summaries
+- **🟢 Session Management** - Start, stop, pause, and resume work sessions with precision.
+- **⏱️ Break Tracking** - Automatically track break durations for better work/rest balancing.
+- **🏷️ Tagging System** - Categorize your work with customizable tags for detailed reporting.
+- **📊 Analytics** - Visualize productivity patterns with built-in statistics and charts.
+- **📝 Session Notes** - Document context, achievements, and thoughts for each session.
+- **📈 Weekly Reports** - Get insights into your productivity with comprehensive weekly summaries.
 - **💹 Mail Based Github Like HTML Reports** - Track your progress more like github commits, in any frequency as your like.
-- **🔄 Flexible Exports** - Export your data to JSON or CSV for external analysis
-- **🎨 Rich Terminal UI** - Enjoy a visually appealing interface with color-coding and formatting
-- **⚡ Performance** - Minimal resource usage with lightning-fast command execution
-- **🔒 Privacy-Focused** - All data stays local on your machine, no cloud sync required
+- **🔄 Flexible Exports** - Export your data to JSON or CSV for external analysis.
+- **🎨 Rich Terminal UI** - Enjoy a visually appealing interface with color-coding and formatting.
+- **⚡ Performance** - Minimal resource usage with lightning-fast command execution.
+- **🔒 Privacy-Focused** - All data stays local on your machine, no cloud sync required.
 
 > **⚠️ WARNING: ChronoTrack does not automatically back up your data. Be sure to regularly export and back up your productivity data to prevent loss during system failures or accidental deletions.**
 
