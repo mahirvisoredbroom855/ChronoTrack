@@ -1,3 +1,6 @@
+# This file is the main file for CLI commands (The Initilization)
+
+
 import typer
 import click
 import webbrowser
@@ -221,7 +224,8 @@ def save_preferences(data):
         json.dump(data, f, indent=4)
 
 
-# Helper: Load preferences (if any)
+# Helper: Load prefer
+# ences (if any)
 def load_preferences():
     if SETTINGS_FILE.exists():
         with open(SETTINGS_FILE, "r") as f:
