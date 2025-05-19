@@ -8,7 +8,7 @@ from chronotrack.generate_report import generate
 from chronotrack.utils import load_preferences, save_preferences
 
 def report_scheduler():
-    prefs = load_preferences()
+    prefs = load_preferences() # loading preferences 
     if not prefs:
         print("⚠️ No user preferences found. Please run `set_schedule` in CLI first.")
         return
@@ -17,7 +17,7 @@ def report_scheduler():
     interval = timedelta(days=prefs["days"])
     now = datetime.now()
 
-    if now - last_sent >= interval:
+    if now - last_sent >= interval: # the full logic for troubleshooting
         print("📤 Time to send scheduled report!")
         builder = ReportBuilder()
         report_data = builder.build_full_report()
