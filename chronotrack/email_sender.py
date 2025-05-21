@@ -72,6 +72,7 @@ def get_domain_name():
 
 
 
+# good work, but needs more refinement
 
 def send_email_report(to_email: str, html_report_path: Path):
     """
