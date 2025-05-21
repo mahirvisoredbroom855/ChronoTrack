@@ -38,9 +38,10 @@
 
 ---
 
+
 ## 📦 Installation
 
-### Via PyPI (Recommended)
+### Via PyPI
 
 ```bash
 pip install chronotrack
