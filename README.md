@@ -44,7 +44,7 @@
 ### Via PyPI
 
 ```bash
-pip install chronotrack
+pip install chronotrack-cli
 ```
 
 ### Via Conda
