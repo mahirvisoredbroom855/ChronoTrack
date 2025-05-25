@@ -9,7 +9,7 @@
 
 </div>
 
-> **A lightweight yet powerful CLI-based time tracker engineered for developers and creators. Log your work sessions, breaks, categorize with tags, and analyze productivity patterns—all from your terminal with ease.**
+> **A Lightweight Yet Powerful CLI-based Time Tracker Engineered for Developers and Creators. Log Your Work Sessions, Breaks, Categorize with Tags, and Analyze Productivity Patterns—all From Your Terminal With Ease.**
 
 ---
 
