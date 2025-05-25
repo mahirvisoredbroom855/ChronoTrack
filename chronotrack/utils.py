@@ -63,3 +63,8 @@ def load_preferences():
 def save_preferences(data):
     with open(PREFS_FILE, "w") as f:
         json.dump(data, f, indent=4)
+
+
+
+
+# Good Work
