@@ -186,7 +186,7 @@ def cli():
     pass
 
 
-### NAH DUDE NO WAY
+
 
 @app.command()
 def report(preview: bool = typer.Option(False, "--preview", help="Preview the report in browser."),
