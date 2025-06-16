@@ -42,8 +42,3 @@ def report_scheduler():
 if __name__ == "__main__":
     report_scheduler()
 
-
-
-# Good Work
-
-# NIce day good update
